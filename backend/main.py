@@ -8,7 +8,7 @@ from routers import etudiants, frais, paiements, retards, depenses, categories, 
 
 load_dotenv()
 
-app = FastAPI(title="Secret des Maîtres - Gestion")
+app = FastAPI(title="Secret des Maîtres - Gestion", redirect_slashes=False)
 
 # Origines autorisées à contacter ce backend (local + futur site en ligne)
 origines = os.getenv("ORIGINES_AUTORISEES", "http://localhost:5173").split(",")
