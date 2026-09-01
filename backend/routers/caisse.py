@@ -19,7 +19,7 @@ def lire_fonds_de_caisse(db):
 
 
 # ÉTAT DE LA CAISSE (fonds + encaissé - dépenses - remises)
-@router.get("/", response_model=schemas.CaisseComplete)
+@router.get("", response_model=schemas.CaisseComplete)
 def etat_caisse(db: Session = Depends(get_db), utilisateur=Depends(utilisateur_actuel)):
     fonds = lire_fonds_de_caisse(db)
 

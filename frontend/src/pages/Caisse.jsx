@@ -9,7 +9,7 @@ function Caisse() {
 
   function chargerCaisse() {
     setChargement(true);
-    api.get("/caisse/")
+    api.get("/caisse")
       .then((reponse) => {
         setDonnees(reponse.data);
         setChargement(false);
