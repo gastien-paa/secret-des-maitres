@@ -40,15 +40,19 @@ def creer_token(donnees: dict) -> str:
 
 def utilisateur_actuel(token: str = Depends(oauth2_scheme)):
     """Vérifie le jeton et renvoie les infos de l'utilisateur connecté."""
+    print(">>> DEBUG: token reçu =", token[:30] if token else "AUCUN TOKEN")
+    print(">>> DEBUG: CLE utilisée =", CLE_SECRETE[:10])
     erreur = HTTPException(status_code=401, detail="Non authentifié")
     try:
         charge = jwt.decode(token, CLE_SECRETE, algorithms=[ALGORITHME])
         identifiant = charge.get("sub")
         role = charge.get("role")
+        print(">>> DEBUG: token VALIDE, utilisateur =", identifiant)
         if identifiant is None:
             raise erreur
         return {"identifiant": identifiant, "role": role}
-    except JWTError:
+    except JWTError as e:
+        print(">>> DEBUG: token REJETÉ, raison =", str(e))
         raise erreur
 
 
