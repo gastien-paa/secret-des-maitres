@@ -9,6 +9,7 @@ import Historique from "./pages/Historique";
 import Caisse from "./pages/Caisse";
 import Remises from "./pages/Remises";
 import Connexion from "./pages/Connexion";
+import MonCompte from "./pages/MonCompte";
 
 function App() {
   const [connecte, setConnecte] = useState(() => {
@@ -49,6 +50,7 @@ function App() {
           <Link to="/depenses" style={lienStyle}>Dépenses</Link>
           <Link to="/caisse" style={lienStyle}>Caisse</Link>
           <Link to="/remises" style={lienStyle}>Remises</Link>
+          <Link to="/mon-compte" style={lienStyle}>Mon compte</Link>
 
           {/* Liens admin uniquement */}
           {estAdmin && <Link to="/retards" style={lienStyle}>Retards</Link>}
@@ -78,6 +80,7 @@ function App() {
             <Route path="/depenses" element={<Depenses />} />
             <Route path="/caisse" element={<Caisse />} />
             <Route path="/remises" element={<Remises />} />
+            <Route path="/mon-compte" element={<MonCompte />} />
 
             {/* Pages admin uniquement : si un gérant tente d'y accéder, il est redirigé */}
             <Route path="/retards" element={estAdmin ? <Retards /> : <Navigate to="/etudiants" />} />

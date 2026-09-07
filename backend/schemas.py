@@ -238,3 +238,27 @@ class CaisseComplete(BaseModel):
 
 class FondsCaisseUpdate(BaseModel):
     montant: float
+
+
+    # ===== GESTION DES COMPTES =====
+
+class ChangerMotDePasse(BaseModel):
+    ancien_mot_de_passe: str
+    nouveau_mot_de_passe: str
+
+class ChangerIdentifiant(BaseModel):
+    mot_de_passe: str  # confirmer avec le mot de passe
+    nouvel_identifiant: str
+
+class AdminResetMotDePasse(BaseModel):
+    identifiant_cible: str  # quel compte modifier
+    nouveau_mot_de_passe: str
+
+class UtilisateurInfo(BaseModel):
+    id: int
+    identifiant: str
+    role: str
+    nom_complet: Optional[str] = None
+
+    class Config:
+        from_attributes = True

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from dotenv import load_dotenv
 from database import engine
-from routers import etudiants, frais, paiements, retards, depenses, categories, tableau_bord, auth, caisse, remises
+from routers import etudiants, frais, paiements, retards, depenses, categories, tableau_bord, auth, caisse, remises, comptes
 
 load_dotenv()
 
@@ -32,6 +32,7 @@ app.include_router(tableau_bord.router)
 app.include_router(auth.router)
 app.include_router(caisse.router)
 app.include_router(remises.router)
+app.include_router(comptes.router)
 
 
 @app.get("/")
