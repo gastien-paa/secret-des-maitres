@@ -71,38 +71,37 @@ function Etudiants() {
       });
   }
 
-  // Liste des concours réellement présents (pour le filtre)
   const concoursPresents = [...new Set(etudiants.map((e) => e.concours_vise || "Non précisé"))].sort();
 
-  // Étudiants filtrés selon le concours choisi
   const etudiantsAffiches = filtreConcours === "tous"
     ? etudiants
     : etudiants.filter((e) => (e.concours_vise || "Non précisé") === filtreConcours);
 
   return (
     <div>
+      <style>{cssEtudiants}</style>
       <h2 style={{ color: "#1e293b" }}>Étudiants</h2>
 
       {/* Formulaire d'ajout */}
       <div style={{ background: "white", padding: 20, borderRadius: 12, marginBottom: 30, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
         <h3 style={{ marginTop: 0 }}>Ajouter un étudiant</h3>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <input placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} style={champStyle} />
-          <input placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} style={champStyle} />
-          <input placeholder="Contact" value={contact} onChange={(e) => setContact(e.target.value)} style={champStyle} />
-          <select value={concours} onChange={(e) => setConcours(e.target.value)} style={champStyle}>
+        <div className="form-ajout">
+          <input placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} className="champ" />
+          <input placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} className="champ" />
+          <input placeholder="Contact" value={contact} onChange={(e) => setContact(e.target.value)} className="champ" />
+          <select value={concours} onChange={(e) => setConcours(e.target.value)} className="champ">
             <option value="">— Concours visé —</option>
             {CONCOURS.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <button onClick={ajouterEtudiant} style={boutonStyle}>Ajouter</button>
+          <button onClick={ajouterEtudiant} className="bouton-ajouter">Ajouter</button>
         </div>
       </div>
 
       {/* Filtre par concours */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <span style={{ color: "#64748b", fontSize: 14 }}>Filtrer par concours :</span>
+        <span style={{ color: "#64748b", fontSize: 14 }}>Filtrer :</span>
         <button
           onClick={() => setFiltreConcours("tous")}
           style={boutonFiltre(filtreConcours === "tous")}
@@ -124,59 +123,62 @@ function Etudiants() {
         <h3 style={{ marginTop: 0 }}>
           {filtreConcours === "tous" ? "Tous les étudiants" : `Concours : ${filtreConcours}`} ({etudiantsAffiches.length})
         </h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
-              <th style={thStyle}>Nom</th>
-              <th style={thStyle}>Prénom</th>
-              <th style={thStyle}>Contact</th>
-              <th style={thStyle}>Concours</th>
-              <th style={thStyle}>Statut</th>
-              <th style={thStyle}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {etudiantsAffiches.map((e) => (
-              <tr key={e.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                <td style={tdStyle}>
-                  <Link to={`/etudiants/${e.id}/fiche`} style={{ color: "#3b82f6", textDecoration: "none", fontWeight: "bold" }}>
-                    {e.nom}
-                  </Link>
-                </td>
-                <td style={tdStyle}>{e.prenom}</td>
-                <td style={tdStyle}>{e.contact || "—"}</td>
-                <td style={tdStyle}>{e.concours_vise || "—"}</td>
-                <td style={tdStyle}>{e.statut}</td>
-                <td style={tdStyle}>
-                  <button
-                    onClick={() => genererFrais(e.id, `${e.nom} ${e.prenom}`)}
-                    style={boutonPetit("#22c55e")}
-                  >
-                    Générer frais
-                  </button>
-                  {estAdmin && (
-                    <button
-                      onClick={() => supprimerEtudiant(e.id, `${e.nom} ${e.prenom}`)}
-                      style={boutonPetit("#ef4444")}
-                    >
-                      Supprimer
-                    </button>
-                  )}
-                </td>
+        {/* Conteneur scrollable pour le tableau sur mobile */}
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+            <thead>
+              <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
+                <th style={thStyle}>Nom</th>
+                <th style={thStyle}>Prénom</th>
+                <th style={thStyle}>Contact</th>
+                <th style={thStyle}>Concours</th>
+                <th style={thStyle}>Statut</th>
+                <th style={thStyle}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {etudiantsAffiches.map((e) => (
+                <tr key={e.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={tdStyle}>
+                    <Link to={`/etudiants/${e.id}/fiche`} style={{ color: "#3b82f6", textDecoration: "none", fontWeight: "bold" }}>
+                      {e.nom}
+                    </Link>
+                  </td>
+                  <td style={tdStyle}>{e.prenom}</td>
+                  <td style={tdStyle}>{e.contact || "—"}</td>
+                  <td style={tdStyle}>{e.concours_vise || "—"}</td>
+                  <td style={tdStyle}>{e.statut}</td>
+                  <td style={tdStyle}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() => genererFrais(e.id, `${e.nom} ${e.prenom}`)}
+                        style={boutonPetit("#22c55e")}
+                      >
+                        Générer frais
+                      </button>
+                      {estAdmin && (
+                        <button
+                          onClick={() => supprimerEtudiant(e.id, `${e.nom} ${e.prenom}`)}
+                          style={boutonPetit("#ef4444")}
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
-const champStyle = { padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 14 };
-const boutonStyle = { padding: "8px 20px", background: "#3b82f6", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 14 };
 const boutonPetit = (couleur) => ({
   padding: "6px 12px", background: couleur, color: "white", border: "none",
-  borderRadius: 6, cursor: "pointer", fontSize: 13, marginRight: 8
+  borderRadius: 6, cursor: "pointer", fontSize: 13, whiteSpace: "nowrap"
 });
 const boutonFiltre = (actif) => ({
   padding: "6px 14px", background: actif ? "#1e3a8a" : "white",
@@ -184,7 +186,42 @@ const boutonFiltre = (actif) => ({
   borderRadius: 20, cursor: "pointer", fontSize: 13,
   fontWeight: actif ? "bold" : "normal"
 });
-const thStyle = { padding: "10px 8px", color: "#64748b", fontSize: 13 };
+const thStyle = { padding: "10px 8px", color: "#64748b", fontSize: 13, whiteSpace: "nowrap" };
 const tdStyle = { padding: "10px 8px", color: "#334155" };
+
+const cssEtudiants = `
+  .form-ajout {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .champ {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .bouton-ajouter {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  @media (max-width: 768px) {
+    .champ {
+      width: 100%;
+      flex: none;
+      box-sizing: border-box;
+    }
+    .bouton-ajouter {
+      width: 100%;
+    }
+  }
+`;
 
 export default Etudiants;

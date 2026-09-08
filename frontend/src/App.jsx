@@ -20,6 +20,9 @@ function App() {
   const nom = localStorage.getItem("nom_complet");
   const estAdmin = role === "admin";
 
+  // Menu ouvert/fermé sur mobile
+  const [menuOuvert, setMenuOuvert] = useState(false);
+
   function seDeconnecter() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
@@ -31,58 +34,63 @@ function App() {
     return <Connexion onConnexion={() => setConnecte(true)} />;
   }
 
+  // Fermer le menu quand on clique un lien (utile sur mobile)
+  const fermerMenu = () => setMenuOuvert(false);
+
   return (
     <BrowserRouter>
+      <style>{cssResponsive}</style>
       <div style={{ fontFamily: "sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
-        <nav style={{
-          background: "#1e293b", padding: "16px 30px",
-          display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap"
-        }}>
-          <span style={{ color: "white", fontWeight: "bold", fontSize: 18, marginRight: 20 }}>
-            Secret des Maîtres
-          </span>
-
-          {/* Liens visibles par l'admin uniquement */}
-          {estAdmin && <Link to="/" style={lienStyle}>Tableau de bord</Link>}
-
-          {/* Liens visibles par tous */}
-          <Link to="/etudiants" style={lienStyle}>Étudiants</Link>
-          <Link to="/depenses" style={lienStyle}>Dépenses</Link>
-          <Link to="/caisse" style={lienStyle}>Caisse</Link>
-          <Link to="/remises" style={lienStyle}>Remises</Link>
-          <Link to="/mon-compte" style={lienStyle}>Mon compte</Link>
-
-          {/* Liens admin uniquement */}
-          {estAdmin && <Link to="/retards" style={lienStyle}>Retards</Link>}
-          {estAdmin && <Link to="/historique" style={lienStyle}>Historique</Link>}
-
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ color: "#cbd5e1", fontSize: 14 }}>
-              {nom || "Utilisateur"} ({role})
+        <nav className="barre-nav">
+          {/* Ligne du haut : titre + bouton hamburger (mobile) */}
+          <div className="nav-haut">
+            <span style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
+              Secret des Maîtres
             </span>
-            <button onClick={seDeconnecter} style={{
-              background: "#ef4444", color: "white", border: "none",
-              padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontSize: 13
-            }}>
-              Déconnexion
+            <button
+              className="bouton-hamburger"
+              onClick={() => setMenuOuvert(!menuOuvert)}
+              aria-label="Menu"
+            >
+              {menuOuvert ? "✕" : "☰"}
             </button>
+          </div>
+
+          {/* Les liens : toujours visibles sur PC, dépliables sur mobile */}
+          <div className={`nav-liens ${menuOuvert ? "ouvert" : ""}`}>
+            {estAdmin && <Link to="/" style={lienStyle} onClick={fermerMenu}>Tableau de bord</Link>}
+            <Link to="/etudiants" style={lienStyle} onClick={fermerMenu}>Étudiants</Link>
+            <Link to="/depenses" style={lienStyle} onClick={fermerMenu}>Dépenses</Link>
+            <Link to="/caisse" style={lienStyle} onClick={fermerMenu}>Caisse</Link>
+            <Link to="/remises" style={lienStyle} onClick={fermerMenu}>Remises</Link>
+            <Link to="/mon-compte" style={lienStyle} onClick={fermerMenu}>Mon compte</Link>
+            {estAdmin && <Link to="/retards" style={lienStyle} onClick={fermerMenu}>Retards</Link>}
+            {estAdmin && <Link to="/historique" style={lienStyle} onClick={fermerMenu}>Historique</Link>}
+
+            {/* Infos utilisateur + déconnexion */}
+            <div className="nav-user">
+              <span style={{ color: "#cbd5e1", fontSize: 14 }}>
+                {nom || "Utilisateur"} ({role})
+              </span>
+              <button onClick={seDeconnecter} style={{
+                background: "#ef4444", color: "white", border: "none",
+                padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontSize: 13
+              }}>
+                Déconnexion
+              </button>
+            </div>
           </div>
         </nav>
 
-        <div style={{ padding: 30 }}>
+        <div className="contenu-page">
           <Routes>
-            {/* Page d'accueil : tableau de bord pour admin, étudiants pour gérant */}
             <Route path="/" element={estAdmin ? <TableauBord /> : <Navigate to="/etudiants" />} />
-
-            {/* Pages accessibles à tous */}
             <Route path="/etudiants" element={<Etudiants />} />
             <Route path="/etudiants/:id/fiche" element={<FicheEtudiant />} />
             <Route path="/depenses" element={<Depenses />} />
             <Route path="/caisse" element={<Caisse />} />
             <Route path="/remises" element={<Remises />} />
             <Route path="/mon-compte" element={<MonCompte />} />
-
-            {/* Pages admin uniquement : si un gérant tente d'y accéder, il est redirigé */}
             <Route path="/retards" element={estAdmin ? <Retards /> : <Navigate to="/etudiants" />} />
             <Route path="/historique" element={estAdmin ? <Historique /> : <Navigate to="/etudiants" />} />
           </Routes>
@@ -93,5 +101,72 @@ function App() {
 }
 
 const lienStyle = { color: "#cbd5e1", textDecoration: "none", fontSize: 15 };
+
+// CSS responsive : comportement PC vs mobile
+const cssResponsive = `
+  .barre-nav {
+    background: #1e293b;
+    padding: 16px 30px;
+  }
+  .nav-haut {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bouton-hamburger {
+    display: none;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .nav-liens {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .nav-user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .contenu-page {
+    padding: 30px;
+  }
+
+  /* Sur mobile (écran étroit) */
+  @media (max-width: 768px) {
+    .barre-nav {
+      padding: 14px 18px;
+    }
+    .bouton-hamburger {
+      display: block;
+    }
+    .nav-liens {
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .nav-liens.ouvert {
+      display: flex;
+    }
+    .nav-user {
+      margin-left: 0;
+      margin-top: 8px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .contenu-page {
+      padding: 16px;
+    }
+  }
+`;
 
 export default App;

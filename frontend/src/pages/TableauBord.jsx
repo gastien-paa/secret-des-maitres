@@ -36,13 +36,14 @@ function TableauBord() {
     { name: "Solde", montant: donnees.solde },
   ];
 
-  // Date du jour formatée en français
   const aujourdhui = new Date().toLocaleDateString("fr-FR", {
     weekday: "long", year: "numeric", month: "long", day: "numeric"
   });
 
   return (
     <div>
+      <style>{cssTableauBord}</style>
+
       {/* En-tête de bienvenue */}
       <div style={{ marginBottom: 30 }}>
         <h2 style={{ color: "#1e293b", margin: 0 }}>Tableau de bord</h2>
@@ -50,13 +51,13 @@ function TableauBord() {
       </div>
 
       {/* Le solde en vedette */}
-      <div style={{
+      <div className="solde-vedette" style={{
         background: donnees.solde >= 0 ? "linear-gradient(135deg, #1e3a8a, #3b82f6)" : "linear-gradient(135deg, #991b1b, #ef4444)",
-        color: "white", padding: 28, borderRadius: 16, marginBottom: 24,
+        color: "white", borderRadius: 16, marginBottom: 24,
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
       }}>
         <div style={{ fontSize: 15, opacity: 0.9 }}>Solde actuel (trésorerie)</div>
-        <div style={{ fontSize: 42, fontWeight: "bold", marginTop: 4 }}>
+        <div className="solde-montant" style={{ fontWeight: "bold", marginTop: 4 }}>
           {formater(donnees.solde)} F
         </div>
         <div style={{ fontSize: 14, opacity: 0.85, marginTop: 4 }}>
@@ -65,7 +66,7 @@ function TableauBord() {
       </div>
 
       {/* Les cartes secondaires */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 36 }}>
+      <div className="grille-cartes">
         <Carte titre="Total encaissé" valeur={donnees.total_encaisse} couleur="#22c55e" icone="💰" />
         <Carte titre="Total dépensé" valeur={donnees.total_depense} couleur="#ef4444" icone="💸" />
         <Carte titre="Reste à encaisser" valeur={donnees.reste_a_encaisser} couleur="#f59e0b" icone="⏳" />
@@ -75,7 +76,7 @@ function TableauBord() {
       </div>
 
       {/* Les graphiques */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 24 }}>
+      <div className="grille-graphiques">
         <div style={carteGraphique}>
           <h3 style={titreGraphique}>Répartition des encaissements</h3>
           <ResponsiveContainer width="100%" height={280}>
@@ -107,7 +108,6 @@ function TableauBord() {
   );
 }
 
-// Formate un nombre avec des espaces : 165000 → "165 000"
 function formater(nombre) {
   return Number(nombre).toLocaleString("fr-FR");
 }
@@ -135,5 +135,40 @@ const carteGraphique = {
   boxShadow: "0 1px 3px rgba(0,0,0,0.08)"
 };
 const titreGraphique = { color: "#334155", marginTop: 0, marginBottom: 16, fontSize: 16 };
+
+const cssTableauBord = `
+  .solde-vedette {
+    padding: 28px;
+  }
+  .solde-montant {
+    font-size: 42px;
+  }
+  .grille-cartes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .grille-graphiques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+  }
+  @media (max-width: 768px) {
+    .solde-vedette {
+      padding: 20px;
+    }
+    .solde-montant {
+      font-size: 32px;
+    }
+    .grille-cartes {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .grille-graphiques {
+      grid-template-columns: 1fr;
+    }
+  }
+`;
 
 export default TableauBord;

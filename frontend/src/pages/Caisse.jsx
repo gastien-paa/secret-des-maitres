@@ -48,19 +48,20 @@ function Caisse() {
 
   return (
     <div>
+      <style>{cssCaisse}</style>
       <h2 style={{ color: "#1e293b" }}>Caisse</h2>
       <p style={{ color: "#64748b" }}>
         Argent qui devrait être physiquement en caisse actuellement.
       </p>
 
       {/* La caisse actuelle en vedette */}
-      <div style={{
+      <div className="caisse-vedette" style={{
         background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
-        color: "white", padding: 28, borderRadius: 16, marginBottom: 24,
+        color: "white", borderRadius: 16, marginBottom: 24,
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
       }}>
         <div style={{ fontSize: 15, opacity: 0.9 }}>Argent attendu en caisse</div>
-        <div style={{ fontSize: 42, fontWeight: "bold", marginTop: 4 }}>
+        <div className="caisse-montant" style={{ fontWeight: "bold", marginTop: 4 }}>
           {formater(donnees.caisse_actuelle)} F
         </div>
       </div>
@@ -85,15 +86,15 @@ function Caisse() {
           <p style={{ color: "#64748b", fontSize: 14, marginTop: 0 }}>
             La somme que tu laisses au départ dans la caisse. Actuellement : <strong>{formater(donnees.fonds_de_caisse)} F</strong>
           </p>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className="form-fonds">
             <input
               type="number"
               placeholder="Nouveau montant"
               value={nouveauFonds}
               onChange={(e) => setNouveauFonds(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 14 }}
+              className="champ-fonds"
             />
-            <button onClick={definirFonds} style={{ padding: "8px 20px", background: "#1e3a8a", color: "white", border: "none", borderRadius: 8, cursor: "pointer" }}>
+            <button onClick={definirFonds} className="bouton-fonds">
               Enregistrer
             </button>
           </div>
@@ -105,13 +106,50 @@ function Caisse() {
 
 function LigneCalcul({ label, valeur, signe, couleur }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f1f5f9", gap: 10 }}>
       <span style={{ color: "#64748b" }}>{label}</span>
-      <span style={{ color: couleur, fontWeight: 500 }}>
+      <span style={{ color: couleur, fontWeight: 500, whiteSpace: "nowrap" }}>
         {signe} {Number(valeur).toLocaleString("fr-FR")} F
       </span>
     </div>
   );
 }
+
+const cssCaisse = `
+  .caisse-vedette {
+    padding: 28px;
+  }
+  .caisse-montant {
+    font-size: 42px;
+  }
+  .form-fonds {
+    display: flex;
+    gap: 10px;
+  }
+  .champ-fonds {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+  }
+  .bouton-fonds {
+    padding: 10px 20px;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  @media (max-width: 768px) {
+    .caisse-vedette {
+      padding: 20px;
+    }
+    .caisse-montant {
+      font-size: 32px;
+    }
+  }
+`;
 
 export default Caisse;

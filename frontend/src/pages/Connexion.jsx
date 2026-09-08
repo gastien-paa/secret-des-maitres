@@ -13,19 +13,17 @@ function Connexion({ onConnexion }) {
       mot_de_passe: motDePasse,
     })
       .then((reponse) => {
-        // Stocker le jeton et les infos dans le navigateur
         const { access_token, role, nom_complet } = reponse.data;
         localStorage.setItem("token", access_token);
         localStorage.setItem("role", role);
         localStorage.setItem("nom_complet", nom_complet || "");
-        onConnexion(); // prévenir l'app qu'on est connecté
+        onConnexion();
       })
       .catch(() => {
         setErreur("Identifiant ou mot de passe incorrect.");
       });
   }
 
-  // Permet de valider avec la touche Entrée
   function surTouche(e) {
     if (e.key === "Enter") seConnecter();
   }
@@ -33,11 +31,13 @@ function Connexion({ onConnexion }) {
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "linear-gradient(135deg, #1e3a8a, #3b82f6)", fontFamily: "sans-serif"
+      background: "linear-gradient(135deg, #1e3a8a, #3b82f6)", fontFamily: "sans-serif",
+      padding: 16, boxSizing: "border-box"
     }}>
       <div style={{
         background: "white", padding: 40, borderRadius: 16,
-        boxShadow: "0 10px 40px rgba(0,0,0,0.2)", width: 340
+        boxShadow: "0 10px 40px rgba(0,0,0,0.2)", width: "100%", maxWidth: 340,
+        boxSizing: "border-box"
       }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <img src="/logo.jpeg" alt="Logo" style={{ width: 80, height: 80, objectFit: "contain" }} />

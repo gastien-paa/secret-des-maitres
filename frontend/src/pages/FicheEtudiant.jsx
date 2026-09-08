@@ -37,6 +37,10 @@ function FicheEtudiant() {
     return "#ef4444";
   }
 
+  function formater(n) {
+    return Number(n).toLocaleString("fr-FR");
+  }
+
   function enregistrerPaiement(frais) {
     const montant = parseFloat(montantSaisi);
     if (!montant || montant <= 0) {
@@ -68,8 +72,6 @@ function FicheEtudiant() {
         setFraisEnPaiement(null);
         setMontantSaisi("");
         setModeSaisi("especes");
-        // Recharger la fiche immédiatement (données à jour même
-        // si on télécharge le PDF sans fermer le reçu)
         chargerFiche();
       })
       .catch((erreur) => {
@@ -80,6 +82,7 @@ function FicheEtudiant() {
 
   return (
     <div>
+      <style>{cssFiche}</style>
       <Link to="/etudiants" style={{ color: "#3b82f6", textDecoration: "none" }}>
         ← Retour à la liste
       </Link>
@@ -91,7 +94,8 @@ function FicheEtudiant() {
         Contact : {fiche.contact || "—"} &nbsp;|&nbsp; Concours : {fiche.concours_vise || "—"} &nbsp;|&nbsp; Statut : {fiche.statut}
       </p>
 
-      <div style={{ display: "flex", gap: 20, marginBottom: 30, flexWrap: "wrap" }}>
+      {/* Cartes récap : empilées sur mobile */}
+      <div className="cartes-recap">
         <Carte titre="Total dû" valeur={fiche.total_du} couleur="#3b82f6" />
         <Carte titre="Total payé" valeur={fiche.total_paye} couleur="#22c55e" />
         <Carte titre="Reste à payer" valeur={fiche.reste_a_payer} couleur="#ef4444" />
@@ -99,57 +103,59 @@ function FicheEtudiant() {
 
       <div style={{ background: "white", padding: 20, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
         <h3 style={{ marginTop: 0 }}>Frais et paiements</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
-              <th style={thStyle}>Libellé</th>
-              <th style={thStyle}>Dû</th>
-              <th style={thStyle}>Payé</th>
-              <th style={thStyle}>Reste</th>
-              <th style={thStyle}>Échéance</th>
-              <th style={thStyle}>Statut</th>
-              <th style={thStyle}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fiche.frais.map((f) => (
-              <tr key={f.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                <td style={tdStyle}>{f.libelle}</td>
-                <td style={tdStyle}>{f.montant_du} F</td>
-                <td style={tdStyle}>{f.montant_paye} F</td>
-                <td style={tdStyle}>{f.reste_a_payer} F</td>
-                <td style={tdStyle}>{f.date_echeance}</td>
-                <td style={tdStyle}>
-                  <span style={{
-                    background: couleurStatut(f.statut), color: "white",
-                    padding: "3px 10px", borderRadius: 20, fontSize: 12
-                  }}>
-                    {f.statut}
-                  </span>
-                </td>
-                <td style={tdStyle}>
-                  {f.statut !== "paye" && (
-                    <button
-                      onClick={() => setFraisEnPaiement(f.id)}
-                      style={{ padding: "5px 12px", background: "#22c55e", color: "white", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13 }}
-                    >
-                      Payer
-                    </button>
-                  )}
-                </td>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 650 }}>
+            <thead>
+              <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
+                <th style={thStyle}>Libellé</th>
+                <th style={thStyle}>Dû</th>
+                <th style={thStyle}>Payé</th>
+                <th style={thStyle}>Reste</th>
+                <th style={thStyle}>Échéance</th>
+                <th style={thStyle}>Statut</th>
+                <th style={thStyle}>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {fiche.frais.map((f) => (
+                <tr key={f.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={tdStyle}>{f.libelle}</td>
+                  <td style={tdStyle}>{formater(f.montant_du)} F</td>
+                  <td style={tdStyle}>{formater(f.montant_paye)} F</td>
+                  <td style={tdStyle}>{formater(f.reste_a_payer)} F</td>
+                  <td style={tdStyle}>{f.date_echeance}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: couleurStatut(f.statut), color: "white",
+                      padding: "3px 10px", borderRadius: 20, fontSize: 12
+                    }}>
+                      {f.statut}
+                    </span>
+                  </td>
+                  <td style={tdStyle}>
+                    {f.statut !== "paye" && (
+                      <button
+                        onClick={() => setFraisEnPaiement(f.id)}
+                        style={{ padding: "5px 12px", background: "#22c55e", color: "white", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
+                      >
+                        Payer
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {fraisEnPaiement && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
           background: "rgba(0,0,0,0.5)", display: "flex",
-          alignItems: "center", justifyContent: "center"
+          alignItems: "center", justifyContent: "center", padding: 16, zIndex: 1000
         }}>
-          <div style={{ background: "white", padding: 30, borderRadius: 12, minWidth: 320 }}>
+          <div style={{ background: "white", padding: 24, borderRadius: 12, width: "100%", maxWidth: 360, boxSizing: "border-box" }}>
             <h3 style={{ marginTop: 0 }}>Enregistrer un paiement</h3>
             {(() => {
               const frais = fiche.frais.find((f) => f.id === fraisEnPaiement);
@@ -157,7 +163,7 @@ function FicheEtudiant() {
                 <>
                   <p style={{ color: "#64748b" }}>
                     {frais.libelle}<br />
-                    Reste à payer : <strong>{frais.reste_a_payer} F</strong>
+                    Reste à payer : <strong>{formater(frais.reste_a_payer)} F</strong>
                   </p>
                   <input
                     type="number"
@@ -205,23 +211,44 @@ function FicheEtudiant() {
 
 function Carte({ titre, valeur, couleur }) {
   return (
-    <div style={{
-      background: "white", padding: 20, borderRadius: 12,
-      minWidth: 150, boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-      borderTop: `4px solid ${couleur}`
-    }}>
+    <div className="carte-recap" style={{ borderTop: `4px solid ${couleur}` }}>
       <div style={{ color: "#64748b", fontSize: 14 }}>{titre}</div>
       <div style={{ color: couleur, fontSize: 24, fontWeight: "bold", marginTop: 6 }}>
-        {valeur} F
+        {Number(valeur).toLocaleString("fr-FR")} F
       </div>
     </div>
   );
 }
 
-const thStyle = { padding: "10px 8px", color: "#64748b", fontSize: 13 };
-const tdStyle = { padding: "10px 8px", color: "#334155" };
-const champStyle = { padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 14 };
-const boutonValider = { padding: "10px", background: "#22c55e", color: "white", border: "none", borderRadius: 8, cursor: "pointer" };
-const boutonAnnuler = { padding: "10px", background: "#94a3b8", color: "white", border: "none", borderRadius: 8, cursor: "pointer" };
+const thStyle = { padding: "10px 8px", color: "#64748b", fontSize: 13, whiteSpace: "nowrap" };
+const tdStyle = { padding: "10px 8px", color: "#334155", whiteSpace: "nowrap" };
+const champStyle = { padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 14 };
+const boutonValider = { padding: "12px", background: "#22c55e", color: "white", border: "none", borderRadius: 8, cursor: "pointer" };
+const boutonAnnuler = { padding: "12px", background: "#94a3b8", color: "white", border: "none", borderRadius: 8, cursor: "pointer" };
+
+const cssFiche = `
+  .cartes-recap {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+  .carte-recap {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    min-width: 150px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    flex: 1;
+  }
+  @media (max-width: 768px) {
+    .cartes-recap {
+      gap: 12px;
+    }
+    .carte-recap {
+      min-width: 100%;
+    }
+  }
+`;
 
 export default FicheEtudiant;
