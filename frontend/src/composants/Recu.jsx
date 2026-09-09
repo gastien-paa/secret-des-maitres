@@ -31,7 +31,14 @@ function Recu({ infos, onFermer }) {
     const y = (hauteurPage - hauteur) / 2;
 
     pdf.addImage(image, "PNG", x, y, largeur, hauteur);
-    pdf.save(`Recu-${infos.numero_recu}.pdf`);
+
+    // Nettoyer le nom de l'étudiant pour un nom de fichier valide
+    const nomPropre = (infos.nom_etudiant || "etudiant")
+      .replace(/[^a-zA-Z0-9À-ÿ ]/g, "")  // retire les caractères spéciaux
+      .replace(/\s+/g, "_")               // remplace les espaces par _
+      .trim();
+
+    pdf.save(`Recu-${nomPropre}-${infos.numero_recu}.pdf`);
   }
 
   const montantAPayer = infos.montant + infos.reste_a_payer;
