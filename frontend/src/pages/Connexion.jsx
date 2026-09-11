@@ -30,13 +30,22 @@ function Connexion({ onConnexion }) {
 
   return (
     <div style={{
-      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "linear-gradient(135deg, #1e3a8a, #3b82f6)", fontFamily: "sans-serif",
-      padding: 16, boxSizing: "border-box"
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "sans-serif",
+      padding: 16,
+      boxSizing: "border-box",
+      // Image de fond + voile sombre par-dessus pour la lisibilité
+      backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), url("/classe.jpg")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
     }}>
       <div style={{
         background: "white", padding: 40, borderRadius: 16,
-        boxShadow: "0 10px 40px rgba(0,0,0,0.2)", width: "100%", maxWidth: 340,
+        boxShadow: "0 10px 40px rgba(0,0,0,0.35)", width: "100%", maxWidth: 340,
         boxSizing: "border-box"
       }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
