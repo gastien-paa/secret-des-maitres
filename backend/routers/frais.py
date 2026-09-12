@@ -11,7 +11,6 @@ router = APIRouter(prefix="/frais", tags=["Frais"])
 # ATTRIBUER un frais à un étudiant
 @router.post("/", response_model=schemas.FraisOut)
 def creer_frais(frais: schemas.FraisCreate, db: Session = Depends(get_db)):
-    # On vérifie d'abord que l'étudiant existe
     etudiant = db.query(models.Etudiant).filter(models.Etudiant.id == frais.etudiant_id).first()
     if etudiant is None:
         raise HTTPException(status_code=404, detail="Étudiant introuvable")
@@ -47,7 +46,7 @@ def generer_calendrier(demande: schemas.GenererFraisRequest, db: Session = Depen
     if etudiant is None:
         raise HTTPException(status_code=404, detail="Étudiant introuvable")
 
-# Empêcher les doublons : refuser si l'étudiant a déjà des frais
+    # Empêcher les doublons : refuser si l'étudiant a déjà des frais
     frais_existants = db.query(models.FraisEtudiant).filter(
         models.FraisEtudiant.etudiant_id == demande.etudiant_id
     ).count()
@@ -58,6 +57,7 @@ def generer_calendrier(demande: schemas.GenererFraisRequest, db: Session = Depen
         )
 
     a = demande.annee_debut          # 2026
+    JOUR = 25                        # jour d'échéance de chaque frais
     frais_a_creer = []
 
     # 1. Le frais d'inscription (5 000 F)
@@ -66,7 +66,7 @@ def generer_calendrier(demande: schemas.GenererFraisRequest, db: Session = Depen
         type_frais="inscription",
         libelle="Inscription",
         montant_du=5000,
-        date_echeance=date(a, 9, 5),
+        date_echeance=date(a, 9, JOUR),
     ))
 
     # 2. Les 8 mensualités (20 000 F), de septembre à avril
@@ -82,7 +82,7 @@ def generer_calendrier(demande: schemas.GenererFraisRequest, db: Session = Depen
             type_frais="mensualite",
             libelle=f"Mensualité {nom_mois} {annee}",
             montant_du=20000,
-            date_echeance=date(annee, num_mois, 5),
+            date_echeance=date(annee, num_mois, JOUR),
         ))
 
     # Tout enregistrer d'un coup
