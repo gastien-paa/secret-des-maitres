@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import jsPDF from "jspdf";
 import api from "../api";
 
 // Liste des concours proposés à l'inscription
@@ -71,6 +72,127 @@ function Etudiants() {
       });
   }
 
+  // Charger une image (le logo) et la convertir pour le PDF
+  function chargerImage(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/jpeg"));
+      };
+      img.onerror = () => resolve(null); // si le logo ne charge pas, on continue sans
+      img.src = url;
+    });
+  }
+
+  // Générer le PDF de la liste des étudiants du concours filtré
+  async function telechargerListePDF() {
+    const BLEU = [30, 58, 138];
+    const JAUNE = [245, 197, 24];
+
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const largeur = pdf.internal.pageSize.getWidth();
+
+    // Bandeau supérieur coloré
+    pdf.setFillColor(...BLEU);
+    pdf.rect(0, 0, largeur, 6, "F");
+    pdf.setFillColor(...JAUNE);
+    pdf.rect(0, 6, largeur, 2, "F");
+
+    // Logo
+    const logo = await chargerImage("/logo.jpeg");
+    if (logo) {
+      pdf.addImage(logo, "JPEG", 15, 14, 24, 24);
+    }
+
+    // En-tête texte
+    pdf.setTextColor(...BLEU);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(20);
+    pdf.text("SECRET DES MAÎTRES", largeur / 2, 22, { align: "center" });
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(11);
+    pdf.setTextColor(80, 80, 80);
+    pdf.text("Centre de préparation aux concours", largeur / 2, 29, { align: "center" });
+
+    // Ligne de séparation
+    pdf.setDrawColor(...BLEU);
+    pdf.setLineWidth(0.6);
+    pdf.line(15, 44, largeur - 15, 44);
+
+    // Titre du document
+    pdf.setTextColor(...BLEU);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(15);
+    pdf.text("LISTE DES ÉTUDIANTS", largeur / 2, 55, { align: "center" });
+
+    const nomConcours = filtreConcours === "tous" ? "Tous les concours" : `Concours : ${filtreConcours}`;
+    pdf.setFontSize(12);
+    pdf.setTextColor(50, 50, 50);
+    pdf.text(nomConcours, largeur / 2, 63, { align: "center" });
+
+    // En-tête du tableau
+    let y = 75;
+    pdf.setFillColor(...BLEU);
+    pdf.rect(15, y, largeur - 30, 9, "F");
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(11);
+    pdf.text("N°", 20, y + 6);
+    pdf.text("Nom", 33, y + 6);
+    pdf.text("Prénom", 95, y + 6);
+    pdf.text("Statut", 160, y + 6);
+
+    // Lignes des étudiants
+    y += 9;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(30, 30, 30);
+
+    etudiantsAffiches.forEach((e, index) => {
+      // Nouvelle page si on arrive en bas
+      if (y > 275) {
+        pdf.addPage();
+        y = 20;
+      }
+      // Fond alterné pour la lisibilité
+      if (index % 2 === 0) {
+        pdf.setFillColor(243, 246, 250);
+        pdf.rect(15, y, largeur - 30, 8, "F");
+      }
+      pdf.setTextColor(30, 30, 30);
+      pdf.text(String(index + 1), 20, y + 5.5);
+      pdf.text(e.nom || "", 33, y + 5.5);
+      pdf.text(e.prenom || "", 95, y + 5.5);
+      pdf.text(e.statut || "", 160, y + 5.5);
+      y += 8;
+    });
+
+    // Total
+    y += 6;
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(11);
+    pdf.setTextColor(...BLEU);
+    pdf.text(`Total : ${etudiantsAffiches.length} étudiant(s)`, 15, y);
+
+    // Date de génération
+    const date = new Date().toLocaleDateString("fr-FR", {
+      year: "numeric", month: "long", day: "numeric"
+    });
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(120, 120, 120);
+    pdf.text(`Généré le ${date}`, largeur - 15, y, { align: "right" });
+
+    // Nom du fichier
+    const nomFichier = filtreConcours === "tous" ? "Tous" : filtreConcours.replace(/[^a-zA-Z0-9]/g, "_");
+    pdf.save(`Liste-etudiants-${nomFichier}.pdf`);
+  }
+
   const concoursPresents = [...new Set(etudiants.map((e) => e.concours_vise || "Non précisé"))].sort();
 
   const etudiantsAffiches = filtreConcours === "tous"
@@ -120,11 +242,22 @@ function Etudiants() {
 
       {/* Tableau de la liste */}
       <div style={{ background: "white", padding: 20, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <h3 style={{ marginTop: 0 }}>
-          {filtreConcours === "tous" ? "Tous les étudiants" : `Concours : ${filtreConcours}`} ({etudiantsAffiches.length})
-        </h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <h3 style={{ margin: 0 }}>
+            {filtreConcours === "tous" ? "Tous les étudiants" : `Concours : ${filtreConcours}`} ({etudiantsAffiches.length})
+          </h3>
+          {etudiantsAffiches.length > 0 && (
+            <button onClick={telechargerListePDF} style={{
+              padding: "8px 16px", background: "#1e3a8a", color: "white", border: "none",
+              borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: "bold"
+            }}>
+              📄 Télécharger la liste PDF
+            </button>
+          )}
+        </div>
+
         {/* Conteneur scrollable pour le tableau sur mobile */}
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", marginTop: 16 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
             <thead>
               <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
