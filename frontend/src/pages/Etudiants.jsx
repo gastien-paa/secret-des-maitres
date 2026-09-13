@@ -144,8 +144,7 @@ function Etudiants() {
     pdf.setFontSize(11);
     pdf.text("N°", 20, y + 6);
     pdf.text("Nom", 33, y + 6);
-    pdf.text("Prénom", 95, y + 6);
-    pdf.text("Statut", 160, y + 6);
+    pdf.text("Prénom", 110, y + 6);
 
     // Lignes des étudiants
     y += 9;
@@ -167,8 +166,7 @@ function Etudiants() {
       pdf.setTextColor(30, 30, 30);
       pdf.text(String(index + 1), 20, y + 5.5);
       pdf.text(e.nom || "", 33, y + 5.5);
-      pdf.text(e.prenom || "", 95, y + 5.5);
-      pdf.text(e.statut || "", 160, y + 5.5);
+      pdf.text(e.prenom || "", 110, y + 5.5);
       y += 8;
     });
 
